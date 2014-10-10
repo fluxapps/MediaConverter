@@ -82,7 +82,7 @@ class ilMediaConverterCron extends ilCronJob {
 	 */
 	public function run() {
 		//
-		$ilPid = new ilPid();
+		$ilPid = new mcPid();
 		$pid = getmypid();
 		$user_pid_id = getmyuid();
 
@@ -95,16 +95,16 @@ class ilMediaConverterCron extends ilCronJob {
 		$ilPid->create();
 		$ilPid->update();
 		if ($ilPid->getNumberOfPids() <= self::MAX) {
-			foreach (ilObjMediaConverter::getNextPendingMediaID() as $ilObjMediaConverter) {
-				$ilMediaState = new ilMediaState();
-				if ($ilObjMediaConverter->getStatusConvert() == ilObjMediaConverter::STATUS_RUNNING) {
+			foreach (mcMedia::getNextPendingMediaID() as $ilObjMediaConverter) {
+				$ilMediaState = new mcMediaState();
+				if ($ilObjMediaConverter->getStatusConvert() == mcMedia::STATUS_RUNNING) {
 					continue;
 				}
 
-				$ilObjMediaConverter->setStatusConvert(ilObjMediaConverter::STATUS_RUNNING);
+				$ilObjMediaConverter->setStatusConvert(mcMedia::STATUS_RUNNING);
 				$ilObjMediaConverter->update();
 
-				$arr_target_mime_types = array( ilObjMediaConverter::ARR_TARGET_MIME_TYPE_W, ilObjMediaConverter::ARR_TARGET_MIME_TYPE_W );
+				$arr_target_mime_types = array( mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_W );
 				foreach ($arr_target_mime_types as $mime_type) {
 					if (! $ilObjMediaConverter->hasConvertedMimeType($mime_type)) {
 						//TODO falsche id wird vergeben
@@ -116,9 +116,9 @@ class ilMediaConverterCron extends ilCronJob {
 						//TODO aktuell wird nur in webm konvertiert nicht in h264
 						ilFFmpeg::convert($file, $mime_type, $ilObjMediaConverter->getTargetDir(), 'video' . '.' . substr($mime_type, 6, 8));
 						$ilObjMediaConverter->setDateConvert(date('Y-m-d'));
-						$ilObjMediaConverter->setStatusConvert(ilObjMediaConverter::STATUS_FINISHED);
+						$ilObjMediaConverter->setStatusConvert(mcMedia::STATUS_FINISHED);
 						$ilObjMediaConverter->update();
-						$ilMediaProcessed = new ilMediaProcessed();
+						$ilMediaProcessed = new mcProcessedMedia();
 						//TODO id wird aufsteigend eingetragen, statt die vorgesehene
 						$ilMediaProcessed->saveConvertedFile($ilObjMediaConverter->getId(), date('Y-m-d'), substr($mime_type, 6));
 						$ilMediaProcessed->update();

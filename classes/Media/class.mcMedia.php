@@ -244,10 +244,10 @@ class mcMedia extends ActiveRecord {
 
 	//get all videos, with the status 'waiting' to convert
 	/**
-	 * @return ilObjMediaConverter[]
+	 * @return mcMedia[]
 	 */
 	public static function getNextPendingMediaID() {
-		return ilObjMediaConverter::where(array( 'status_convert' => self::STATUS_WAITING ))->orderBy("id")->get();
+		return self::where(array( 'status_convert' => self::STATUS_WAITING ))->orderBy("id")->get();
 	}
 
 
@@ -287,12 +287,18 @@ class mcMedia extends ActiveRecord {
 	}
 
 
-	//TODO videos nach dem Konvertieren aus /temp löschen
+	/**
+	 * @todo  videos nach dem Konvertieren aus /temp löschen
+	 */
 	public function deleteFile() {
 	}
 
 
-	//temporary folder for the file, that is still not converted, call this first
+	/**
+	 * @param $tmp_path
+	 *
+	 * @description temporary folder for the file, that is still not converted, call this first
+	 */
 	public function uploadTemp($tmp_path) {
 		$file_path = $this->getFilePath();
 		$this->recursiveMkdir($file_path);
@@ -302,7 +308,7 @@ class mcMedia extends ActiveRecord {
 
 
 	/**
-	 * Call this function after uploadFile and uploadTemp to deliver it to the right directory
+	 * @description Call this function after uploadFile and uploadTemp to deliver it to the right directory
 	 *
 	 * @param string $tmp_path current path of file
 	 */
@@ -310,20 +316,20 @@ class mcMedia extends ActiveRecord {
 		$file_path = $this->getTargetDir();
 		$this->recursiveMkdir($file_path);
 		move_uploaded_file($tmp_path, $file_path . $this->getFilename() . '.' . substr($_FILES['suffix']['type'], 6, 5));
-		// move_uploaded_file($this->getFilename(),$file_path);
-		//print_r("tmp_path: " . $tmp_path . " file_path: " . $file_path . " file name: " . $this->getFilename() . " suffix: " . substr($_FILES['suffix']['type'], 6, 5));
-		// exit;
 	}
 
 
-	//get target direction from user
+	/**
+	 * @return string
+	 */
 	public function getTargetDir() {
-		///var/www/ilias_trunk/data/meinilias/xvip/Converted/
-		return CLIENT_WEB_DIR . '/xvip/Converted/';
+		return CLIENT_WEB_DIR . '/xvip/converted/';
 	}
 
 
-	//temporary path for the file before it is converted
+	/**
+	 * @return string
+	 */
 	public function getFilePath() {
 		return CLIENT_DATA_DIR . '/temp/videos';
 	}
