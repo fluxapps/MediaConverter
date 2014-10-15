@@ -13,10 +13,12 @@ cd Customizing/global/plugins/Services/Cron/CronHook
 git clone https://github.com/studer-raimann/MediaConverter.git
 ```
 
-###Contact
-studer + raimann ag
-Waldeggstrasse 72
-3097 Liebefeld
+Contact
+-------
+studer + raimann ag  
+Waldeggstrasse 72  
+3097 Liebefeld  
+Switzerland 
 
-info@studer-raimann.ch/
-www.studer-raimann.ch
+info@studer-raimann.ch  
+www.studer-raimann.ch  
