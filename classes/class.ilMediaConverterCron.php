@@ -1,7 +1,13 @@
 <?php
 
 require_once './Services/Cron/classes/class.ilCronJob.php';
-require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.ilMediaConverterStatus.php';
+require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.ilMediaConverterResult.php';
+require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcPid.php';
+require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMedia.php';
+require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMediaState.php';
+require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcProcessedMedia.php';
+//require_once './Services/MediaObjects/classes/class.ilFFmpeg.php';
+require_once './Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/VideoManager/classes/Util/class.vmFFmpeg.php';
 require_once './Services/Mail/classes/class.ilMimeMail.php';
 require_once './Services/Link/classes/class.ilLink.php';
 require_once './Services/Repository/classes/class.ilRepUtil.php';
@@ -10,6 +16,7 @@ require_once './Services/Repository/classes/class.ilRepUtil.php';
  * Class ilMediaConverterCron
  *
  * @author Fabian Schmid <fs@studer-raimann.ch>
+ * @author Theodor Truffer <tt@studer-raimann.ch>
  */
 class ilMediaConverterCron extends ilCronJob {
 
@@ -81,52 +88,61 @@ class ilMediaConverterCron extends ilCronJob {
 	 * @return ilMediaConverterResult
 	 */
 	public function run() {
-		//
-		$ilPid = new mcPid();
-		$pid = getmypid();
-		$user_pid_id = getmyuid();
 
-		global $ilLog;
-		//look if the maximum number of jobs are reached
-		//if this is so, don't start a new job
-		//else start job
-		$ilPid->setPidId($pid);
-		$ilPid->setPidUid($user_pid_id);
-		$ilPid->create();
-		$ilPid->update();
-		if ($ilPid->getNumberOfPids() <= self::MAX) {
-			foreach (mcMedia::getNextPendingMediaID() as $ilObjMediaConverter) {
-				$ilMediaState = new mcMediaState();
-				if ($ilObjMediaConverter->getStatusConvert() == mcMedia::STATUS_RUNNING) {
-					continue;
-				}
+        $mcPid = new mcPid();
+        $pid = getmypid();
+        $user_pid_id = getmyuid();
+        //look if the maximum number of jobs are reached
+        //if this is so, don't start a new job
+        //else start job
+        $mcPid->setPidId($pid);
+        $mcPid->setPidUid($user_pid_id);
+        $mcPid->create();
+        $mcPid->update();
+        if ($mcPid->getNumberOfPids() <= 3) {
+            foreach (mcMedia::getNextPendingMediaID() as $media) {
+                if ($media->getStatusConvert() == mcMedia::STATUS_RUNNING) {
+                    continue;
+                }
 
-				$ilObjMediaConverter->setStatusConvert(mcMedia::STATUS_RUNNING);
-				$ilObjMediaConverter->update();
+                $media->setStatusConvert(mcMedia::STATUS_RUNNING);
+                $media->update();
 
-				$arr_target_mime_types = array( mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_W );
-				foreach ($arr_target_mime_types as $mime_type) {
-					if (! $ilObjMediaConverter->hasConvertedMimeType($mime_type)) {
-						//TODO falsche id wird vergeben
-						$ilMediaState->setId($ilObjMediaConverter->getId());
-						$ilMediaState->setProcessStarted(date('Y-m-d'));
-						$ilMediaState->create();
-						$ilMediaState->update();
-						$file = $ilObjMediaConverter->getFilePath() . '/' . $_POST['title'] . '.' . substr($ilObjMediaConverter->getSuffix(), 6, 8);
-						//TODO aktuell wird nur in webm konvertiert nicht in h264
-						ilFFmpeg::convert($file, $mime_type, $ilObjMediaConverter->getTargetDir(), 'video' . '.' . substr($mime_type, 6, 8));
-						$ilObjMediaConverter->setDateConvert(date('Y-m-d'));
-						$ilObjMediaConverter->setStatusConvert(mcMedia::STATUS_FINISHED);
-						$ilObjMediaConverter->update();
-						$ilMediaProcessed = new mcProcessedMedia();
-						//TODO id wird aufsteigend eingetragen, statt die vorgesehene
-						$ilMediaProcessed->saveConvertedFile($ilObjMediaConverter->getId(), date('Y-m-d'), substr($mime_type, 6));
-						$ilMediaProcessed->update();
-					}
-				}
-			}
-		}
+                $arr_target_mime_types = array( mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_M );
+                foreach ($arr_target_mime_types as $mime_type) {
+                    if ($media->getSuffix() != substr(6, $mime_type)) {
+                        //create/update mediastate db entry
+                        if($mediaState = mcMediaState::find($media->getId())){
+                            $mediaState->setProcessStarted(date('Y-m-d'));
+                            $mediaState->update();
+                        }else{
+                            $mediaState = new mcMediaState();
+                            $mediaState->setId($media->getId());
+                            $mediaState->setProcessStarted(date('Y-m-d'));
+                            $mediaState->create();
+                        }
 
+                        //convert file to targetdir
+                        $file = $media->getTempFilePath() . '/' . $media->getFilename() . '.' . $media->getSuffix();
+                        vmFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . substr($mime_type, 6));
+
+                        //update media db entry
+                        $media->setDateConvert(date('Y-m-d'));
+                        $media->setStatusConvert(mcMedia::STATUS_FINISHED);
+                        $media->update();
+
+                        //create mediaprocessed db entry
+                        $mcProcessedMedia = new mcProcessedMedia();
+                        //TODO id wird aufsteigend eingetragen, statt die vorgesehene
+                        $mcProcessedMedia->saveConvertedFile($media->getId(), date('Y-m-d'), substr($mime_type, 6));
+                    }
+                }
+                //delete temp file
+                $media->deleteFile();
+            }
+        }
+
+        //cron result
 		return new ilMediaConverterResult(ilMediaConverterResult::STATUS_OK, 'Cron job terminated successfully.');
 	}
 }

@@ -1,6 +1,7 @@
-<?
+<?php
 require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.ilMediaConverterPlugin.php');
-ilMediaConverterPlugin::loadAR();
+require_once('./Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php');
+//ilMediaConverterPlugin::loadAR();
 
 /**
  * Class mcPid
@@ -24,7 +25,7 @@ class mcPid extends ActiveRecord {
 	 *
 	 * @con_has_field        true
 	 * @con_fieldtype        integer
-	 * @con_length           20
+	 * @con_length           8
 	 * @con_is_primary       true
 	 */
 	protected $pid_id;
@@ -33,7 +34,7 @@ class mcPid extends ActiveRecord {
 	 *
 	 * @con_has_field        true
 	 * @con_fieldtype        integer
-	 * @con_length           20
+	 * @con_length           8
 	 */
 	protected $pid_uid;
 
@@ -73,7 +74,7 @@ class mcPid extends ActiveRecord {
 	//count all ids and return the number of PID's
 	//TODO am Ende löschen, da scheinbar die selben ids manchmal vergeben werden
 	public function getNumberOfPids() {
-		return ilPid::where(array( 'pid_id' => $this->getPidId() ))->count();
+		return mcPid::where(array( 'pid_id' => $this->getPidId() ))->count();
 	}
 }
 
