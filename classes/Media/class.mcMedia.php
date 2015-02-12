@@ -1,22 +1,22 @@
-<?
+<?php
 require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.ilMediaConverterPlugin.php');
-ilMediaConverterPlugin::loadAR();
+require_once('./Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php');
 
 /**
  * Class mcMedia
  *
  * @author      Zeynep Karahan  <zk@studer-raimann.ch>
  * @author      Fabian Schmid <fs@studer-raimann.ch>
+ * @author      Theodor Truffer <tt@studer-raimann.ch>
  */
 class mcMedia extends ActiveRecord {
 
-	const ARR_TARGET_MIME_TYPE_H = "video/h.264";
+	const ARR_TARGET_MIME_TYPE_M = "video/mp4";
 	const ARR_TARGET_MIME_TYPE_W = "video/webm";
 	const STATUS_WAITING = 1;
 	const STATUS_RUNNING = 2;
 	const STATUS_FINISHED = 5;
 	const STATUS_FAILED = 9;
-
 
 	/**
 	 * @return string
@@ -33,6 +33,7 @@ class mcMedia extends ActiveRecord {
 	 * @con_fieldtype        integer
 	 * @con_length           8
 	 * @con_is_primary       true
+     * @con_sequence         true
 	 */
 	protected $id;
 	/**
@@ -51,6 +52,14 @@ class mcMedia extends ActiveRecord {
 	 * @con_length       20
 	 */
 	protected $suffix;
+    /**
+     * @var string
+     *
+     * @con_has_field   true
+     * @con_fieldtype   text
+     * @con_length      256
+     */
+    protected $target_dir;
 	/**
 	 * @var int
 	 *
@@ -79,7 +88,7 @@ class mcMedia extends ActiveRecord {
 	 * @var string
 	 *
 	 * @con_has_field        true
-	 * @con_fieldtype        int
+	 * @con_fieldtype        integer
 	 * @con_length           4
 	 */
 	protected $status_convert = self::STATUS_WAITING;
@@ -244,10 +253,10 @@ class mcMedia extends ActiveRecord {
 
 	//get all videos, with the status 'waiting' to convert
 	/**
-	 * @return ilObjMediaConverter[]
+	 * @return mcMedia[]
 	 */
 	public static function getNextPendingMediaID() {
-		return ilObjMediaConverter::where(array( 'status_convert' => self::STATUS_WAITING ))->orderBy("id")->get();
+		return mcMedia::where(array( 'status_convert' => self::STATUS_WAITING ))->orderBy("id")->get();
 	}
 
 
@@ -274,30 +283,33 @@ class mcMedia extends ActiveRecord {
 	 *
 	 * @return string
 	 */
-	public function uploadFile($filename, $suffix, $trigger_obj_id, $trigger_obj_media_id, $trigger_obj_type, $delivery_datetime) {
+	public function uploadFile($filename, $suffix, $path, $target_dir = "", $trigger_obj_id = null,
+                               $trigger_obj_media_id = null, $trigger_obj_type = null, $delivery_datetime = null) {
 		$this->setFilename($filename);
 		$this->setSuffix($suffix);
 		$this->setTriggerObjId($trigger_obj_id);
 		$this->setTriggerObjMediaId($trigger_obj_media_id);
 		$this->setTriggerObjType($trigger_obj_type);
 		$this->setDeliveryDatetime($delivery_datetime);
+        $this->setTargetDir($target_dir);
 		$this->create();
+        $this->uploadTemp($path.'/'.$filename.'.'.$suffix);
 
 		return true;
 	}
 
 
-	//TODO videos nach dem Konvertieren aus /temp löschen
 	public function deleteFile() {
+        ilUtil::delDir($this->getTempFilePath());
 	}
 
 
 	//temporary folder for the file, that is still not converted, call this first
-	public function uploadTemp($tmp_path) {
-		$file_path = $this->getFilePath();
+	protected function uploadTemp($file) {
+		$file_path = $this->getTempFilePath();
 		$this->recursiveMkdir($file_path);
 
-		move_uploaded_file($tmp_path, $file_path . '/' . $this->getFilename() . '.' . substr($_FILES['suffix']['type'], 6, 5));
+		copy($file, $file_path . '/' . $this->getFilename() . '.' . $this->getSuffix());
 	}
 
 
@@ -306,10 +318,10 @@ class mcMedia extends ActiveRecord {
 	 *
 	 * @param string $tmp_path current path of file
 	 */
-	public function upload($tmp_path) {
+	protected function upload($tmp_path) {
 		$file_path = $this->getTargetDir();
 		$this->recursiveMkdir($file_path);
-		move_uploaded_file($tmp_path, $file_path . $this->getFilename() . '.' . substr($_FILES['suffix']['type'], 6, 5));
+		copy($tmp_path, $file_path . $this->getFilename() . '.' . substr($_FILES['suffix']['type'], 6, 5));
 		// move_uploaded_file($this->getFilename(),$file_path);
 		//print_r("tmp_path: " . $tmp_path . " file_path: " . $file_path . " file name: " . $this->getFilename() . " suffix: " . substr($_FILES['suffix']['type'], 6, 5));
 		// exit;
@@ -318,14 +330,22 @@ class mcMedia extends ActiveRecord {
 
 	//get target direction from user
 	public function getTargetDir() {
-		///var/www/ilias_trunk/data/meinilias/xvip/Converted/
-		return CLIENT_WEB_DIR . '/xvip/Converted/';
+		//default: /var/www/ilias_trunk/data/meinilias/xvip/Converted/
+		return $this->target_dir;
 	}
+
+    public function setTargetDir($dir){
+        if($dir == ''){
+            $dir = "CLIENT_WEB_DIR . '/xvip/Converted/'";
+        }
+        $this->target_dir = $dir;
+    }
+
 
 
 	//temporary path for the file before it is converted
-	public function getFilePath() {
-		return CLIENT_DATA_DIR . '/temp/videos';
+	public function getTempFilePath() {
+		return CLIENT_WEB_DIR . '/temp/videos/' . $this->getId();
 	}
 
 
@@ -360,7 +380,7 @@ class mcMedia extends ActiveRecord {
 		if ($query == $mime_type || $query2 == $mime_type) {
 			return true;
 		}
+        return false;
 	}
 }
-
 ?>

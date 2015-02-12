@@ -55,6 +55,7 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 
 			return self::$cron_job_instance;
 		}
+        return false;
 	}
 
 
