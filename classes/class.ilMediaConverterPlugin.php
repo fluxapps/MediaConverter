@@ -77,14 +77,14 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 	public static function loadAR() {
 		$ILIAS_AR = './Services/ActiveRecord/class.ActiveRecord.php';
 		$CUSTOM_AR = './Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php';
-
-		if (class_exists('ActiveRecord')) {
-			return true;
-		}
-
-		if (class_exists('ActiveRecordList')) {
-			return true;
-		}
+//
+//		if (class_exists('ActiveRecord')) {
+//			return true;
+//		}
+//
+//		if (class_exists('ActiveRecordList')) {
+//			return true;
+//		}
 
 		if (is_file($ILIAS_AR)) {
 			require_once($ILIAS_AR);

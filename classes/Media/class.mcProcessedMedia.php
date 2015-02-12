@@ -1,9 +1,4 @@
 <?php
-require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.ilMediaConverterPlugin.php');
-require_once('./Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php');
-
-//ilMediaConverterPlugin::loadAR();
-
 
 /**
  * Class mcProcessedMedia
