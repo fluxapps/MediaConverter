@@ -6,7 +6,6 @@ require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter
 require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMedia.php';
 require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMediaState.php';
 require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcProcessedMedia.php';
-//require_once './Services/MediaObjects/classes/class.ilFFmpeg.php';
 require_once './Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/VideoManager/classes/Util/class.vmFFmpeg.php';
 require_once './Services/Mail/classes/class.ilMimeMail.php';
 require_once './Services/Link/classes/class.ilLink.php';
@@ -88,17 +87,26 @@ class ilMediaConverterCron extends ilCronJob {
 	 * @return ilMediaConverterResult
 	 */
 	public function run() {
-
-        $mcPid = new mcPid();
         $pid = getmypid();
         $user_pid_id = getmyuid();
+
         //look if the maximum number of jobs are reached
         //if this is so, don't start a new job
         //else start job
-        $mcPid->setPidId($pid);
-        $mcPid->setPidUid($user_pid_id);
-        $mcPid->create();
-        $mcPid->update();
+        if(mcPid::find($pid))
+        {
+            $mcPid = new mcPid($pid);
+            $mcPid->setPidUid($user_pid_id);
+            $mcPid->update();
+        }
+        else
+        {
+            $mcPid = new mcPid();
+            $mcPid->setPidId($pid);
+            $mcPid->setPidUid($user_pid_id);
+            $mcPid->create();
+        }
+
         if ($mcPid->getNumberOfPids() <= 3) {
             foreach (mcMedia::getNextPendingMediaID() as $media) {
                 if ($media->getStatusConvert() == mcMedia::STATUS_RUNNING) {
