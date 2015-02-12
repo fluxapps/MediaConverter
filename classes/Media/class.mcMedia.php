@@ -292,10 +292,10 @@ class mcMedia extends ActiveRecord {
 		$this->setTriggerObjType($trigger_obj_type);
 		$this->setDeliveryDatetime($delivery_datetime);
         $this->setTargetDir($target_dir);
-		$this->create();
+        $this->create();
         $this->uploadTemp($path.'/'.$filename.'.'.$suffix);
 
-		return true;
+		return $this->getId();
 	}
 
 
