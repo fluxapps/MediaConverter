@@ -1,12 +1,12 @@
-<?
-require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.ilMediaConverterPlugin.php');
-ilMediaConverterPlugin::loadAR();
-
+<?php
+require_once('./Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/CtrlMainMenu/classes/class.ilCtrlMainMenuPlugin.php');
+ilCtrlMainMenuPlugin::loadActiveRecord();
 /**
  * Class mcProcessedMedia
  *
  * @author      Zeynep Karahan  <zk@studer-raimann.ch>
  * @author      Fabian Schmid <fs@studer-raimann.ch>
+ * @author      Theodor Truffer <tt@studer-raimann.ch>
  */
 class mcProcessedMedia extends ActiveRecord {
 
@@ -101,7 +101,11 @@ class mcProcessedMedia extends ActiveRecord {
 		$this->setId($id);
 		$this->setConvertedDatetime($converted_datetime);
 		$this->setConvertedMimeType($converted_mime_type);
-		$this->create();
+        if($this->find($id) == null){
+		    $this->create();
+        }else{
+            $this->update();
+        }
 	}
 }
 
