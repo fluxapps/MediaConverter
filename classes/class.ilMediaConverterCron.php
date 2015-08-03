@@ -119,7 +119,7 @@ class ilMediaConverterCron extends ilCronJob {
 
 				$arr_target_mime_types = array( mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_M );
 				foreach ($arr_target_mime_types as $mime_type) {
-					if ($media->getSuffix() != substr(6, $mime_type)) {
+					if ($media->getSuffix() != substr($mime_type, 6)) {
 						//create/update mediastate db entry
 						if ($mediaState = mcMediaState::find($media->getId())) {
 							$mediaState->setProcessStarted(date('Y-m-d'));
