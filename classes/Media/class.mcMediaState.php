@@ -1,6 +1,7 @@
 <?php
-require_once('./Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/CtrlMainMenu/classes/class.ilCtrlMainMenuPlugin.php');
-ilCtrlMainMenuPlugin::loadActiveRecord();
+require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.mconv.php');
+mconv::loadActiveRecord();
+
 /**
  * Class mcMediaState
  *

@@ -55,7 +55,8 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 
 			return self::$cron_job_instance;
 		}
-        return false;
+
+		return false;
 	}
 
 
@@ -70,28 +71,6 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 	protected function loadCronJobInstance() {
 		if (! isset(self::$cron_job_instance)) {
 			self::$cron_job_instance = new ilMediaConverterCron();
-		}
-	}
-
-
-	public static function loadAR() {
-		$ILIAS_AR = './Services/ActiveRecord/class.ActiveRecord.php';
-		$CUSTOM_AR = './Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php';
-//
-//		if (class_exists('ActiveRecord')) {
-//			return true;
-//		}
-//
-//		if (class_exists('ActiveRecordList')) {
-//			return true;
-//		}
-
-		if (is_file($ILIAS_AR)) {
-			require_once($ILIAS_AR);
-		} elseif (is_file($CUSTOM_AR)) {
-			require_once($CUSTOM_AR);
-		} else {
-			throw new Exception('Please install ILIAS ActiveRecord or use ILIAS 5');
 		}
 	}
 }

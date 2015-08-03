@@ -1,6 +1,7 @@
 <?php
-require_once('./Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/CtrlMainMenu/classes/class.ilCtrlMainMenuPlugin.php');
-ilCtrlMainMenuPlugin::loadActiveRecord();
+require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.mconv.php');
+mconv::loadActiveRecord();
+
 /**
  * Class mcMedia
  *
@@ -17,6 +18,7 @@ class mcMedia extends ActiveRecord {
 	const STATUS_FINISHED = 5;
 	const STATUS_FAILED = 9;
 
+
 	/**
 	 * @return string
 	 */
@@ -32,7 +34,7 @@ class mcMedia extends ActiveRecord {
 	 * @con_fieldtype        integer
 	 * @con_length           8
 	 * @con_is_primary       true
-     * @con_sequence         true
+	 * @con_sequence         true
 	 */
 	protected $id;
 	/**
@@ -51,14 +53,14 @@ class mcMedia extends ActiveRecord {
 	 * @con_length       20
 	 */
 	protected $suffix;
-    /**
-     * @var string
-     *
-     * @con_has_field   true
-     * @con_fieldtype   text
-     * @con_length      256
-     */
-    protected $target_dir;
+	/**
+	 * @var string
+	 *
+	 * @con_has_field   true
+	 * @con_fieldtype   text
+	 * @con_length      256
+	 */
+	protected $target_dir;
 	/**
 	 * @var int
 	 *
@@ -282,24 +284,23 @@ class mcMedia extends ActiveRecord {
 	 *
 	 * @return string
 	 */
-	public function uploadFile($filename, $suffix, $path, $target_dir = "", $trigger_obj_id = null,
-                               $trigger_obj_media_id = null, $trigger_obj_type = null, $delivery_datetime = null) {
+	public function uploadFile($filename, $suffix, $path, $target_dir = "", $trigger_obj_id = NULL, $trigger_obj_media_id = NULL, $trigger_obj_type = NULL, $delivery_datetime = NULL) {
 		$this->setFilename($filename);
 		$this->setSuffix($suffix);
 		$this->setTriggerObjId($trigger_obj_id);
 		$this->setTriggerObjMediaId($trigger_obj_media_id);
 		$this->setTriggerObjType($trigger_obj_type);
 		$this->setDeliveryDatetime($delivery_datetime);
-        $this->setTargetDir($target_dir);
-        $this->create();
-        $this->uploadTemp($path.'/'.$filename.'.'.$suffix);
+		$this->setTargetDir($target_dir);
+		$this->create();
+		$this->uploadTemp($path . '/' . $filename . '.' . $suffix);
 
 		return $this->getId();
 	}
 
 
 	public function deleteFile() {
-        ilUtil::delDir($this->getTempFilePath());
+		ilUtil::delDir($this->getTempFilePath());
 	}
 
 
@@ -333,13 +334,13 @@ class mcMedia extends ActiveRecord {
 		return $this->target_dir;
 	}
 
-    public function setTargetDir($dir){
-        if($dir == ''){
-            $dir = "CLIENT_WEB_DIR . '/xvip/Converted/'";
-        }
-        $this->target_dir = $dir;
-    }
 
+	public function setTargetDir($dir) {
+		if ($dir == '') {
+			$dir = "CLIENT_WEB_DIR . '/xvip/Converted/'";
+		}
+		$this->target_dir = $dir;
+	}
 
 
 	//temporary path for the file before it is converted
@@ -357,7 +358,7 @@ class mcMedia extends ActiveRecord {
 		$dirs = explode(DIRECTORY_SEPARATOR, $path);
 		$count = count($dirs);
 		$path = '';
-		for ($i = 0; $i < $count; ++$i) {
+		for ($i = 0; $i < $count; ++ $i) {
 			if ($path != '/') {
 				$path .= DIRECTORY_SEPARATOR . $dirs[$i];
 			} else {
@@ -379,7 +380,9 @@ class mcMedia extends ActiveRecord {
 		if ($query == $mime_type || $query2 == $mime_type) {
 			return true;
 		}
-        return false;
+
+		return false;
 	}
 }
+
 ?>

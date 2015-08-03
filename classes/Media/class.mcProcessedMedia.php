@@ -1,6 +1,7 @@
 <?php
-require_once('./Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/CtrlMainMenu/classes/class.ilCtrlMainMenuPlugin.php');
-ilCtrlMainMenuPlugin::loadActiveRecord();
+require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.mconv.php');
+mconv::loadActiveRecord();
+
 /**
  * Class mcProcessedMedia
  *
@@ -101,11 +102,11 @@ class mcProcessedMedia extends ActiveRecord {
 		$this->setId($id);
 		$this->setConvertedDatetime($converted_datetime);
 		$this->setConvertedMimeType($converted_mime_type);
-        if($this->find($id) == null){
-		    $this->create();
-        }else{
-            $this->update();
-        }
+		if ($this->find($id) == NULL) {
+			$this->create();
+		} else {
+			$this->update();
+		}
 	}
 }
 
