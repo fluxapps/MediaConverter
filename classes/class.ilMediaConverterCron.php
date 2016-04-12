@@ -133,7 +133,18 @@ class ilMediaConverterCron extends ilCronJob {
 						mcLog::getInstance()->write('Convert type: ' . $mime_type);
 						//convert file to targetdir
 						$file = $media->getTempFilePath() . '/' . $media->getFilename() . '.' . $media->getSuffix();
-						vmFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . substr($mime_type, 6));
+
+						try {
+							vmFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . substr($mime_type, 6));
+						} catch (ilFFmpegException $e) {
+							$media->setStatusConvert(mcMedia::STATUS_FAILED);
+							$media->update();
+
+							mcLog::getInstance()->write('Convertion of Item failed: ' . $media->getFilename());
+							mcLog::getInstance()->write('Exception message: ' . $e->getMessage());
+							continue;
+						}
+
 
 						//update media db entry
 						$media->setDateConvert(date('Y-m-d'));
