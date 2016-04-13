@@ -12,6 +12,7 @@ class mconv {
 
 	const ILIAS_44 = 44;
 	const ILIAS_50 = 50;
+	const ILIAS_51 = 51;
 	const MIN_ILIAS_VERSION = self::ILIAS_44;
 
 
@@ -19,6 +20,9 @@ class mconv {
 	 * @return int
 	 */
 	public static function getILIASVersion() {
+		if (ilComponent::isVersionGreaterString(ILIAS_VERSION_NUMERIC, '5.0.999')) {
+			return self::ILIAS_51;
+		}
 		if (ilComponent::isVersionGreaterString(ILIAS_VERSION_NUMERIC, '4.9.999')) {
 			return self::ILIAS_50;
 		}
@@ -53,6 +57,13 @@ class mconv {
 		return self::getILIASVersion() >= self::ILIAS_50;
 	}
 
+	/**
+	 * @return bool
+	 */
+	public static function is51() {
+		return self::getILIASVersion() >= self::ILIAS_51;
+	}
+
 
 	/**
 	 * @return bool
@@ -79,7 +90,7 @@ class mconv {
 	 * @throws ilPluginExceptions
 	 */
 	public static function loadActiveRecord() {
-		if (self::is50() AND is_file('./Services/ActiveRecord/class.ActiveRecord.php')) {
+		if ((self::is50() OR self::is51()) AND is_file('./Services/ActiveRecord/class.ActiveRecord.php')) {
 			require_once('./Services/ActiveRecord/class.ActiveRecord.php');
 		} elseif (is_file('./Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php')) {
 			require_once('./Customizing/global/plugins/Libraries/ActiveRecord/class.ActiveRecord.php');

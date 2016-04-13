@@ -88,82 +88,97 @@ class ilMediaConverterCron extends ilCronJob {
 	 * @return ilMediaConverterResult
 	 */
 	public function run() {
-		$pid = getmypid();
-		$user_pid_id = getmyuid();
-		mcLog::getInstance()->write('Starting Job');
-		//look if the maximum number of jobs are reached
-		//if this is so, don't start a new job
-		//else start job
-		if (mcPid::find($pid)) {
-			$mcPid = new mcPid($pid);
-			$mcPid->setPidUid($user_pid_id);
-			$mcPid->update();
-		} else {
-			$mcPid = new mcPid();
-			$mcPid->setPidId($pid);
-			$mcPid->setPidUid($user_pid_id);
-			$mcPid->create();
-		}
-
-		if ($mcPid->getNumberOfPids() <= 3) {
-			foreach (mcMedia::getNextPendingMediaID() as $media) {
-				if ($media->getStatusConvert() == mcMedia::STATUS_RUNNING) {
-					mcLog::getInstance()->write('Skipping already running task');
-					continue;
-				}
-
-				mcLog::getInstance()->write('Convert new Item: ' . $media->getFilename());
-
-				$media->setStatusConvert(mcMedia::STATUS_RUNNING);
-				$media->update();
-
-				$arr_target_mime_types = array( mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_M );
-				foreach ($arr_target_mime_types as $mime_type) {
-					if ($media->getSuffix() != substr($mime_type, 6)) {
-						//create/update mediastate db entry
-						if ($mediaState = mcMediaState::find($media->getId())) {
-							$mediaState->setProcessStarted(date('Y-m-d'));
-							$mediaState->update();
-						} else {
-							$mediaState = new mcMediaState();
-							$mediaState->setId($media->getId());
-							$mediaState->setProcessStarted(date('Y-m-d'));
-							$mediaState->create();
-						}
-						mcLog::getInstance()->write('Convert type: ' . $mime_type);
-						//convert file to targetdir
-						$file = $media->getTempFilePath() . '/' . $media->getFilename() . '.' . $media->getSuffix();
-
-						try {
-							vmFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . substr($mime_type, 6));
-						} catch (ilFFmpegException $e) {
-							$media->setStatusConvert(mcMedia::STATUS_FAILED);
-							$media->update();
-
-							mcLog::getInstance()->write('Convertion of Item failed: ' . $media->getFilename());
-							mcLog::getInstance()->write('Exception message: ' . $e->getMessage());
-							continue;
-						}
-
-
-						//update media db entry
-						$media->setDateConvert(date('Y-m-d'));
-						$media->setStatusConvert(mcMedia::STATUS_FINISHED);
-						$media->update();
-
-						//create mediaprocessed db entry
-						$mcProcessedMedia = new mcProcessedMedia();
-						//TODO id wird aufsteigend eingetragen, statt die vorgesehene
-						$mcProcessedMedia->saveConvertedFile($media->getId(), date('Y-m-d'), substr($mime_type, 6));
-					}
-				}
-				//delete temp file
-				$media->deleteFile();
+		try {
+			$pid = getmypid();
+			$user_pid_id = getmyuid();
+			mcLog::getInstance()->write('Starting Job');
+			//look if the maximum number of jobs are reached
+			//if this is so, don't start a new job
+			//else start job
+			if (mcPid::find($pid)) {
+				$mcPid = new mcPid($pid);
+				$mcPid->setPidUid($user_pid_id);
+				$mcPid->update();
+			} else {
+				$mcPid = new mcPid();
+				$mcPid->setPidId($pid);
+				$mcPid->setPidUid($user_pid_id);
+				$mcPid->create();
 			}
+
+			if ($mcPid->getNumberOfPids() <= 3) {
+				foreach (mcMedia::getNextPendingMediaID() as $media) {
+					if ($media->getStatusConvert() == mcMedia::STATUS_RUNNING) {
+						mcLog::getInstance()->write('Skipping already running task');
+						continue;
+					}
+
+					mcLog::getInstance()->write('Convert new Item: ' . $media->getFilename());
+
+					$media->setStatusConvert(mcMedia::STATUS_RUNNING);
+					$media->update();
+
+					$arr_target_mime_types = array(mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_M);
+					foreach ($arr_target_mime_types as $mime_type) {
+						if ($media->getSuffix() != substr($mime_type, 6)) {
+							//create/update mediastate db entry
+							if ($mediaState = mcMediaState::find($media->getId())) {
+								$mediaState->setProcessStarted(date('Y-m-d'));
+								$mediaState->update();
+							} else {
+								$mediaState = new mcMediaState();
+								$mediaState->setId($media->getId());
+								$mediaState->setProcessStarted(date('Y-m-d'));
+								$mediaState->create();
+							}
+							mcLog::getInstance()->write('Convert type: ' . $mime_type);
+							//convert file to targetdir
+							$file = $media->getTempFilePath() . '/' . $media->getFilename() . '.' . $media->getSuffix();
+
+							try {
+								vmFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . substr($mime_type, 6));
+								mcLog::getInstance()->write('Convertion succeeded');
+							} catch (ilFFmpegException $e) {
+								$media->setStatusConvert(mcMedia::STATUS_FAILED);
+								$media->update();
+
+								mcLog::getInstance()->write('Convertion of Item failed: ' . $media->getFilename());
+								mcLog::getInstance()->write('Exception message: ' . $e->getMessage());
+								continue;
+							}
+
+
+//							mcLog::getInstance()->write('Updating DB..');
+							//update media db entry
+							$media->setDateConvert(date('Y-m-d'));
+							$media->setStatusConvert(mcMedia::STATUS_FINISHED);
+							$media->update();
+//							mcLog::getInstance()->write('DB-Entry updated');
+
+							//create mediaprocessed db entry
+							$mcProcessedMedia = new mcProcessedMedia();
+							//TODO id wird aufsteigend eingetragen, statt die vorgesehene
+							$mcProcessedMedia->saveConvertedFile($media->getId(), date('Y-m-d'), substr($mime_type, 6));
+						}
+					}
+					//delete temp file
+//					mcLog::getInstance()->write('Deleting temporary File..');
+					$media->deleteFile();
+//					mcLog::getInstance()->write('Temporary File deleted');
+				}
+			}
+
+			//cron result
+			return new ilMediaConverterResult(ilMediaConverterResult::STATUS_OK, 'Cron job terminated successfully.');
+
+		} catch (Exception $e) {
+
+			//cron result
+			return new ilMediaConverterResult(ilMediaConverterResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());
+
 		}
 
-		//cron result
-		return new ilMediaConverterResult(ilMediaConverterResult::STATUS_OK, 'Cron job terminated successfully.');
+
 	}
 }
 
