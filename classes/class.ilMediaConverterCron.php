@@ -91,7 +91,6 @@ class ilMediaConverterCron extends ilCronJob {
 		try {
 			$pid = getmypid();
 			$user_pid_id = getmyuid();
-			mcLog::getInstance()->write('Starting Job');
 			//look if the maximum number of jobs are reached
 			//if this is so, don't start a new job
 			//else start job
@@ -118,7 +117,7 @@ class ilMediaConverterCron extends ilCronJob {
 					$media->setStatusConvert(mcMedia::STATUS_RUNNING);
 					$media->update();
 
-					$arr_target_mime_types = array(mcMedia::ARR_TARGET_MIME_TYPE_W, mcMedia::ARR_TARGET_MIME_TYPE_M);
+					$arr_target_mime_types = array(mcMedia::ARR_TARGET_MIME_TYPE_M, mcMedia::ARR_TARGET_MIME_TYPE_W);
 					foreach ($arr_target_mime_types as $mime_type) {
 						if ($media->getSuffix() != substr($mime_type, 6)) {
 							//create/update mediastate db entry
