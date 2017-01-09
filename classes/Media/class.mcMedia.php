@@ -261,13 +261,21 @@ class mcMedia extends ActiveRecord {
 	}
 
 
-	//get file from user
-	public function getFile() {
-		$path = $_FILES['suffix']['tmp_name'];
-		$type = $_FILES['suffix']['type'];
+    /**
+     * @return array
+     */
+	public static function getSupportedMimeTypes() {
+	    return array(self::ARR_TARGET_MIME_TYPE_M, self::ARR_TARGET_MIME_TYPE_W);
+    }
 
-		return $path . '/' . $_POST['title'] . '.' . substr($type, 6, 5);
-	}
+
+	//get file from user
+//	public function getFile() {
+//		$path = $_FILES['suffix']['tmp_name'];
+//		$type = $_FILES['suffix']['type'];
+//
+//		return $path . '/' . $_POST['title'] . '.' . substr($type, 6, 5);
+//	}
 
 
 	/**
@@ -372,17 +380,6 @@ class mcMedia extends ActiveRecord {
 		return true;
 	}
 
-
-	public function hasConvertedMimeType($mime_type) {
-		$query = $this->where('suffix is' . self::ARR_TARGET_MIME_TYPE_W);
-		$query2 = $this->where('suffix is' . self::ARR_TARGET_MIME_TYPE_H);
-
-		if ($query == $mime_type || $query2 == $mime_type) {
-			return true;
-		}
-
-		return false;
-	}
 }
 
 ?>
