@@ -6,8 +6,8 @@ require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter
 require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMedia.php';
 require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMediaState.php';
 require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcProcessedMedia.php';
-require_once './Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/VideoManager/classes/Util/class.vmFFmpeg.php';
 require_once './Services/Mail/classes/class.ilMimeMail.php';
+require_once("./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Util/class.mcFFmpeg.php");
 require_once './Services/Link/classes/class.ilLink.php';
 require_once './Services/Repository/classes/class.ilRepUtil.php';
 require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.mcLog.php');
