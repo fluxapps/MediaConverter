@@ -139,7 +139,7 @@ class ilMediaConverterCron extends ilCronJob {
 						continue;
 					}
 					try {
-						vmFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . $mime_suffix);
+						mcFFmpeg::convert($file, $mime_type, $media->getTargetDir(), $media->getFilename() . '.' . $mime_suffix);
 						mcLog::getInstance()->write('Convertion succeeded of file ' . $media->getFilename());
 					} catch (ilFFmpegException $e) {
 						$media->setStatusConvert(mcMedia::STATUS_FAILED);

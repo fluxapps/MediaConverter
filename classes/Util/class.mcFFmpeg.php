@@ -77,7 +77,7 @@ class mcFFmpeg extends ilFFmpeg {
 			return $target_file;
 		} else {
 			include_once("./Services/MediaObjects/exceptions/class.ilFFmpegException.php");
-			throw new ilFFmpegException("It was not possible to convert file " . basename($a_file) . ".");
+			throw new ilFFmpegException("It was not possible to convert file " . basename($a_file) . ". CMD: (" . print_r($ret, true). ")");
 		}
 	}
 
@@ -97,5 +97,20 @@ class mcFFmpeg extends ilFFmpeg {
 		$duration = explode(":", $time[0]);
 		$duration_in_seconds = $duration[0] * 3600 + $duration[1] * 60 + round($duration[2]);
 		return $duration_in_seconds;
+	}
+
+	/**
+	 * Execute ffmpeg
+	 *
+	 * @param $args
+	 * @return array
+	 * @throws ilException
+	 * @internal param $
+	 */
+	function exec($args)
+	{
+		if(!PATH_TO_FFMPEG)
+			throw new ilException("ffmpeg not configured on this ilias installation! Go to the setup.");
+		return parent::exec($args);
 	}
 }
