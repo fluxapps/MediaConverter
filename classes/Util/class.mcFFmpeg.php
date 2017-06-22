@@ -107,7 +107,7 @@ class mcFFmpeg extends ilFFmpeg {
 	 * @throws ilException
 	 * @internal param $
 	 */
-	function exec($args)
+	static function exec($args)
 	{
 		if(!PATH_TO_FFMPEG)
 			throw new ilException("ffmpeg not configured on this ilias installation! Go to the setup.");
