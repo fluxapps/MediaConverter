@@ -1,6 +1,5 @@
 <?php
-require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/class.mconv.php');
-mconv::loadActiveRecord();
+require_once('./Services/ActiveRecord/class.ActiveRecord.php');
 
 /**
  * Class mcPid
