@@ -37,10 +37,10 @@ class ilMediaConverterCron extends ilCronJob {
 
 
 	public function __construct() {
-		global $DIC, $ilLog;
+		global $DIC;
 		$this->db = $DIC->database();
 		$this->pl = ilMediaConverterPlugin::getInstance();
-		$this->log = $ilLog;
+		$this->log = $DIC["ilLog"];
 	}
 
 
