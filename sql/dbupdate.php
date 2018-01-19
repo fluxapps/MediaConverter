@@ -7,8 +7,8 @@ require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter
 //require_once('./Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/CtrlMainMenu/classes/class.ilCtrlMainMenuPlugin.php');
 //ilCtrlMainMenuPlugin::loadActiveRecord();
 
-mcMedia::installDB();
-mcProcessedMedia::installDB();
-mcMediaState::installDB();
-mcPid::installDB();
+mcMedia::updateDB();
+mcProcessedMedia::updateDB();
+mcMediaState::updateDB();
+mcPid::updateDB();
 ?>
