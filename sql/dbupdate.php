@@ -4,8 +4,6 @@ require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter
 require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcProcessedMedia.php');
 require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcMediaState.php');
 require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter/classes/Media/class.mcPid.php');
-//require_once('./Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/CtrlMainMenu/classes/class.ilCtrlMainMenuPlugin.php');
-//ilCtrlMainMenuPlugin::loadActiveRecord();
 
 mcMedia::updateDB();
 mcProcessedMedia::updateDB();
