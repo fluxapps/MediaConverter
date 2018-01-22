@@ -9,12 +9,12 @@ require_once('./Services/ActiveRecord/class.ActiveRecord.php');
  * @author  Zeynep Karahan  <zk@studer-raimann.ch>
  */
 class mcPid extends ActiveRecord {
-
+	const TABLE_NAME = 'mco_pid';
 	/**
 	 * @return string
 	 */
 	public static function returnDbTableName() {
-		return 'mco_pid';
+		return self::TABLE_NAME;
 	}
 
 

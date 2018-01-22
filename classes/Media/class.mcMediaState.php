@@ -8,12 +8,12 @@ require_once('./Services/ActiveRecord/class.ActiveRecord.php');
  * @author  Fabian Schmid <fs@studer-raimann.ch>
  */
 class mcMediaState extends ActiveRecord {
-
+	const TABLE_NAME = 'mco_state';
 	/**
 	 * @return string
 	 */
 	public static function returnDbTableName() {
-		return 'mco_state';
+		return self::TABLE_NAME;
 	}
 
 

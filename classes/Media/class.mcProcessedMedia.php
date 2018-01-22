@@ -9,12 +9,12 @@ require_once('./Services/ActiveRecord/class.ActiveRecord.php');
  * @author      Theodor Truffer <tt@studer-raimann.ch>
  */
 class mcProcessedMedia extends ActiveRecord {
-
+	const TABLE_NAME = 'mco_processed';
 	/**
 	 * @return string
 	 */
 	public static function returnDbTableName() {
-		return 'mco_processed';
+		return self::TABLE_NAME;
 	}
 
 

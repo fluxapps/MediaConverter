@@ -9,7 +9,7 @@ require_once('./Services/ActiveRecord/class.ActiveRecord.php');
  * @author      Theodor Truffer <tt@studer-raimann.ch>
  */
 class mcMedia extends ActiveRecord {
-
+	const TABLE_NAME = 'mco_source';
 	const ARR_TARGET_MIME_TYPE_M = "video/mp4";
 	const ARR_TARGET_MIME_TYPE_W = "video/webm";
 	const STATUS_WAITING = 1;
@@ -22,7 +22,7 @@ class mcMedia extends ActiveRecord {
 	 * @return string
 	 */
 	public static function returnDbTableName() {
-		return 'mco_source';
+		return self::TABLE_NAME;
 	}
 
 
