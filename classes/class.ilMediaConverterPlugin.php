@@ -19,7 +19,7 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 	 * @return ilMediaConverterPlugin
 	 */
 	public static function getInstance() {
-		if (! isset(self::$instance)) {
+		if (!isset(self::$instance)) {
 			self::$instance = new self();
 		}
 
@@ -32,6 +32,19 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 	 * @var  ilMediaConverterCron
 	 */
 	protected static $cron_job_instance;
+	/**
+	 * @var ilDB
+	 */
+	protected $db;
+
+
+	public function __construct() {
+		parent::__construct();
+
+		global $DIC;
+
+		$this->db = $DIC->database();
+	}
 
 
 	/**
@@ -69,9 +82,21 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 
 
 	protected function loadCronJobInstance() {
-		if (! isset(self::$cron_job_instance)) {
+		if (!isset(self::$cron_job_instance)) {
 			self::$cron_job_instance = new ilMediaConverterCron();
 		}
+	}
+
+
+	protected function beforeUninstall() {
+		$this->db->dropTable(mcMedia::TABLE_NAME, false);
+		$this->db->dropTable(mcPid::TABLE_NAME, false);
+		$this->db->dropTable(mcProcessedMedia::TABLE_NAME, false);
+		$this->db->dropTable(mcMediaState::TABLE_NAME, false);
+
+		// TODO Delete media folder
+
+		return true;
 	}
 }
 
