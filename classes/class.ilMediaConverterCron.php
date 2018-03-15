@@ -21,7 +21,6 @@ require_once('./Customizing/global/plugins/Services/Cron/CronHook/MediaConverter
 class ilMediaConverterCron extends ilCronJob {
 
 	const MAX_PID = 3;
-	const ID = 'media_conv';
 	/**
 	 * @var  ilMediaConverterPlugin
 	 */
@@ -48,7 +47,7 @@ class ilMediaConverterCron extends ilCronJob {
 	 * @return string
 	 */
 	public function getId() {
-		return self::ID;
+		return ilMediaConverterPlugin::PLUGIN_ID;
 	}
 
 
@@ -104,7 +103,8 @@ class ilMediaConverterCron extends ilCronJob {
 			}
 
 			if ($mcPid->getNumberOfPids() > self::MAX_PID) {
-				return new ilMediaConverterResult(ilMediaConverterResult::STATUS_NO_ACTION, 'Number of PIDs exceeds defined maxima of ' . self::MAX_PID);
+				return new ilMediaConverterResult(ilMediaConverterResult::STATUS_NO_ACTION, 'Number of PIDs exceeds defined maxima of '
+					. self::MAX_PID);
 			}
 
 			foreach (mcMedia::getNextPendingMediaID() as $media) {

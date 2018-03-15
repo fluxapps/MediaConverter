@@ -9,6 +9,8 @@ require_once './Customizing/global/plugins/Services/Cron/CronHook/MediaConverter
  */
 class ilMediaConverterPlugin extends ilCronHookPlugin {
 
+	const PLUGIN_ID = 'media_conv';
+	const PLUGIN_NAME = 'MediaConverter';
 	/**
 	 * @var ilMediaConverterPlugin
 	 */
@@ -27,7 +29,6 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 	}
 
 
-	const PLUGIN_NAME = 'MediaConverter';
 	/**
 	 * @var  ilMediaConverterCron
 	 */
@@ -63,7 +64,7 @@ class ilMediaConverterPlugin extends ilCronHookPlugin {
 	 * @return ilMediaConverterCron
 	 */
 	public function getCronJobInstance($a_job_id) {
-		if ($a_job_id == ilMediaConverterCron::ID) {
+		if ($a_job_id == self::PLUGIN_ID) {
 			$this->loadCronJobInstance();
 
 			return self::$cron_job_instance;
