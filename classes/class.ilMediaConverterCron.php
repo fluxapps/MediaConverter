@@ -52,6 +52,22 @@ class ilMediaConverterCron extends ilCronJob {
 
 
 	/**
+	 * @return string
+	 */
+	public function getTitle() {
+		return ilMediaConverterPlugin::PLUGIN_NAME;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getDescription() {
+		return "";
+	}
+
+
+	/**
 	 * @return bool
 	 */
 	public function hasAutoActivation() {
