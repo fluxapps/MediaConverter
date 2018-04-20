@@ -104,6 +104,7 @@ class ilMediaConverterCron extends ilCronJob {
 	 */
 	public function run() {
 		try {
+			$media = NULL;
 			$pid = getmypid();
 			$user_pid_id = getmyuid();
 			// look if the maximum number of jobs are reached: if this is so, don't start a new job
@@ -182,6 +183,10 @@ class ilMediaConverterCron extends ilCronJob {
 			//cron result
 			return new ilMediaConverterResult(ilMediaConverterResult::STATUS_OK, 'Cron job terminated successfully.');
 		} catch (Exception $e) {
+			if ($media !== NULL) {
+				$media->setStatusConvert(mcMedia::STATUS_FAILED);
+				$media->update();
+			}
 			//cron result
 			return new ilMediaConverterResult(ilMediaConverterResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());
 		}
